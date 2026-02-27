@@ -8,15 +8,15 @@ const Results = ({ settlementData, onReset }) => {
   }
 
   return (
-    <div className="p-6 bg-gray-800 rounded-lg shadow-xl">
+    <div className="p-4 md:p-6 bg-gray-800 rounded-lg shadow-xl">
       <h2 className="text-2xl font-bold text-teal-400 mb-6">Settlement Results</h2>
 
       <div className="mb-8">
         <h3 className="text-xl font-semibold text-gray-200 mb-4">Net Balances</h3>
         <div className="space-y-2">
           {userBalances.map((user, index) => (
-            <div key={index} className="flex justify-between items-center bg-gray-700 p-3 rounded-md">
-              <span className="text-gray-100 font-medium">{user.name}</span>
+            <div key={index} className="flex flex-col sm:flex-row justify-between items-center bg-gray-700 p-3 rounded-md gap-2">
+              <span className="text-gray-100 font-medium text-center sm:text-left">{user.name}</span>
               {user.balance < 0 ? (
                 <span className="text-red-500 font-bold">Owes ₹{-user.balance.toFixed(2)}</span>
               ) : user.balance > 0 ? (
@@ -43,7 +43,7 @@ const Results = ({ settlementData, onReset }) => {
           <p className="text-gray-400">No transactions needed. Everyone is settled!</p>
         )}
       </div>
-      <div className="mt-8 pt-4 border-t border-gray-700 flex justify-between items-center">
+      <div className="mt-8 pt-4 border-t border-gray-700 flex flex-col sm:flex-row justify-between items-center gap-2">
         <h3 className="text-xl font-bold text-teal-400">Total Expense:</h3>
         <span className="text-green-400 text-2xl font-bold">₹{totalExpense.toFixed(2)}</span>
       </div>
