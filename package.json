@@ -8,7 +8,8 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "deploy": "bash scripts/deploy.sh"
+    "deploy": "bash scripts/deploy.sh",
+    "setup": "cp scripts/post-commit.sh .git/hooks/post-commit && chmod +x .git/hooks/post-commit && echo '✅  post-commit hook installed — deploys will fire automatically on commits to main'"
   },
   "dependencies": {
     "playwright": "^1.58.2",
