@@ -22,6 +22,13 @@
 # failure never rolls back or blocks your commit.
 # ─────────────────────────────────────────────────────────────────────────────
 
+# Git sets GIT_DIR, GIT_INDEX_FILE, GIT_WORK_TREE etc. when running hooks.
+# Those vars are inherited by every child process, including npm run deploy.
+# git worktree add then tries to reuse the hook's index file for the new
+# worktree, hits a path conflict, and dies with "Not a directory".
+# Unsetting them here lets all child git commands behave normally.
+unset GIT_DIR GIT_INDEX_FILE GIT_WORK_TREE GIT_OBJECT_DIRECTORY GIT_PREFIX
+
 CURRENT_BRANCH=$(git symbolic-ref --short HEAD 2>/dev/null)
 
 # Only deploy from main
