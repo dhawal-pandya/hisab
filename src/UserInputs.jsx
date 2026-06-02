@@ -1,18 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+
+const STORAGE_KEY = 'hisab_simple';
+
+const DEFAULT_STATE = [{ id: 1, name: '', expenses: [{ id: 1, description: '', amount: '' }] }];
+
+const loadSaved = () => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+};
 
 const UserInputs = ({ onCalculate, initialUsers }) => {
-  const [users, setUsers] = useState(() =>
-    initialUsers || [{ id: 1, name: '', expenses: [{ id: 1, description: '', amount: '' }] }]
-  );
-  const [nextUserId, setNextUserId] = useState(() => {
-    if (!initialUsers?.length) return 2;
-    return Math.max(...initialUsers.map(u => u.id)) + 1;
+  const [users, setUsers] = useState(() => {
+    if (initialUsers) return initialUsers;
+    return loadSaved() || DEFAULT_STATE;
   });
+
+  const [nextUserId, setNextUserId] = useState(() => {
+    const u = initialUsers || loadSaved() || DEFAULT_STATE;
+    return Math.max(...u.map(u => u.id), 1) + 1;
+  });
+
   const [nextExpenseId, setNextExpenseId] = useState(() => {
-    if (!initialUsers) return 2;
-    const ids = initialUsers.flatMap(u => u.expenses.map(e => e.id));
+    const u = initialUsers || loadSaved() || DEFAULT_STATE;
+    const ids = u.flatMap(u => u.expenses.map(e => e.id));
     return ids.length > 0 ? Math.max(...ids) + 1 : 2;
   });
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
+  }, [users]);
 
   const handleAddUser = () => {
     setUsers([...users, { id: nextUserId, name: '', expenses: [{ id: nextExpenseId, description: '', amount: '' }] }]);

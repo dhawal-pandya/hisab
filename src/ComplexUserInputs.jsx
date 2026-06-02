@@ -1,22 +1,48 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+
+const STORAGE_KEY = 'hisab_complex';
+
+const DEFAULT_USERS = [
+  { id: 1, name: '', expenses: [] },
+  { id: 2, name: '', expenses: [] },
+];
+
+const loadSaved = () => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+};
 
 const ComplexUserInputs = ({ onCalculate, initialUsers }) => {
+  const saved = !initialUsers ? loadSaved() : null;
+
   const [stage, setStage] = useState(() => {
-    if (!initialUsers) return 'people';
-    return initialUsers.some(u => u.expenses?.length > 0) ? 'expenses' : 'people';
+    if (initialUsers) return initialUsers.some(u => u.expenses?.length > 0) ? 'expenses' : 'people';
+    return saved?.stage || 'people';
   });
-  const [users, setUsers] = useState(() =>
-    initialUsers || [{ id: 1, name: '', expenses: [] }, { id: 2, name: '', expenses: [] }]
-  );
+
+  const [users, setUsers] = useState(() => {
+    if (initialUsers) return initialUsers;
+    return saved?.users || DEFAULT_USERS;
+  });
+
   const [nextUserId, setNextUserId] = useState(() => {
-    if (!initialUsers?.length) return 3;
-    return Math.max(...initialUsers.map(u => u.id)) + 1;
+    const u = initialUsers || saved?.users || DEFAULT_USERS;
+    return Math.max(...u.map(u => u.id), 2) + 1;
   });
+
   const [nextExpenseId, setNextExpenseId] = useState(() => {
-    if (!initialUsers) return 1;
-    const ids = initialUsers.flatMap(u => (u.expenses || []).map(e => e.id));
+    const u = initialUsers || saved?.users || DEFAULT_USERS;
+    const ids = u.flatMap(u => (u.expenses || []).map(e => e.id));
     return ids.length > 0 ? Math.max(...ids) + 1 : 1;
   });
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ users, stage }));
+  }, [users, stage]);
 
   // ── Stage 1: People ─────────────────────────────────────────────────────────
 

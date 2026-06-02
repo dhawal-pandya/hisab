@@ -6,16 +6,16 @@ import Results from './Results';
 import { calculateSettlement } from './utils/settlement';
 
 function App() {
-  const [mode, setMode] = useState('simple');
+  const [mode, setMode] = useState(() => localStorage.getItem('hisab_mode') || 'simple');
   const [settlementData, setSettlementData] = useState(null);
   const [savedUsers, setSavedUsers] = useState(null);
+  const [resetKey, setResetKey] = useState(0);
 
   const handleCalculate = (users) => {
     setSavedUsers(users);
     setSettlementData(calculateSettlement(users));
   };
 
-  // startFresh=true clears saved data; false keeps it so the form re-populates
   const handleReset = (startFresh = false) => {
     setSettlementData(null);
     if (startFresh) setSavedUsers(null);
@@ -24,20 +24,40 @@ function App() {
   const handleModeSwitch = (newMode) => {
     if (newMode === mode) return;
     setMode(newMode);
+    localStorage.setItem('hisab_mode', newMode);
     setSettlementData(null);
     setSavedUsers(null);
   };
 
+  const handleClear = () => {
+    localStorage.removeItem('hisab_simple');
+    localStorage.removeItem('hisab_complex');
+    setSavedUsers(null);
+    setSettlementData(null);
+    setResetKey(k => k + 1);
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center py-10 px-4 bg-zinc-950 text-zinc-100">
-      <h1 className="text-4xl md:text-6xl font-extrabold mb-8 tracking-tight text-center bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">
-        Hisab
-      </h1>
+      <div className="mb-8 text-center">
+        <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent leading-tight">
+          हिसाब
+        </h1>
+        <p className="text-sm md:text-base text-zinc-500 mt-1 tracking-widest uppercase">
+          Hisab
+        </p>
+      </div>
 
       <div className="bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl shadow-black/60 w-full max-w-2xl">
         {!settlementData ? (
           <div className="p-4 md:p-8">
-            <div className="flex justify-end mb-6">
+            <div className="flex items-center justify-between mb-6">
+              <button
+                onClick={handleClear}
+                className="px-3 py-1.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 hover:bg-rose-500/20 text-sm font-medium transition-all duration-200"
+              >
+                Clear
+              </button>
               <div className="flex items-center gap-1 bg-zinc-800 border border-zinc-700 rounded-full p-1 text-sm">
                 <button
                   onClick={() => handleModeSwitch('simple')}
@@ -62,8 +82,8 @@ function App() {
               </div>
             </div>
             {mode === 'simple'
-              ? <UserInputs onCalculate={handleCalculate} initialUsers={savedUsers} />
-              : <ComplexUserInputs onCalculate={handleCalculate} initialUsers={savedUsers} />
+              ? <UserInputs key={`simple-${resetKey}`} onCalculate={handleCalculate} initialUsers={savedUsers} />
+              : <ComplexUserInputs key={`complex-${resetKey}`} onCalculate={handleCalculate} initialUsers={savedUsers} />
             }
           </div>
         ) : (
